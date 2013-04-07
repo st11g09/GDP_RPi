@@ -26,10 +26,19 @@ def decodeTextFile(Filename):
    fText = f.read()
    angles = fText.split("\n")
    print angles
-   for i in range(0,10):
-      angleList.append(angles[i].split(" "))
-   print angleList
-   return angleList
+   print len(angles)
+   """If the file is being read with completed content. We had issues where the sim
+   was writing to the file at the same point the file was being read and so the
+   length of the file was incomplete. This check ensures the correct numberof angles
+   are present. If not, run the function again until there is the correct number.
+
+   Done with 11 as there is an empty string entry added to the list as a result of split"""
+   if len(angles)==11: 
+       for i in range(0,10):
+           angleList.append(angles[i].split(" "))
+       return angleList
+   else:
+       decodeTextFile("SnakeAngleFeedback.txt")
    f.close()
 
 def writeCustomAngles(ang_and_vel_List,instruction):
@@ -85,7 +94,6 @@ def snake(total_time,Ahor,Aver,rhohor,rhover,deltahor,deltaver,betahor,betaver,d
   m = 5                               # mass of each segment (kg)
   I = (m*S**2)/12                     # moment of inertia (for a thin rod)
   
-  reset=False
   for t in linspace(dt,total_time,steps):
     "Changed to go form dt - as in Leonard's code"
     phi=0                             #gravity vector can change with time
@@ -299,14 +307,25 @@ def halfsnake(total_time,AhorF,AhorR,AverF,AverR,rhohorF,rhohorR,rhoverF,rhoverR
   
 ################################################################################################################################  
 
-def snakecall(gaits,time=20,orientation='0',speed='5',reset=False,instruction="w",custAng=[]):
+def snakecall(gaits,time=20,orientation='0',speed='5',stop=False,instruction="w",custAng=[],resetOr=False):
     """ 'types' = 'sidewinding'/'lateral'/'rotating'/'rolling'/'linear'.
     'forward' means directly sideway for sidewinding where delta0 = pi/4"""
     if len(custAng)==0:
-        if reset == True:
-           return snake(20,pi/6,pi/6,3*pi/4,3*pi/4,7*pi/18,7*pi/18,0,0,pi/4,True,instruction)
-                    
-        if gaits == 'sidewinding':
+        if stop == True:
+           print "stop = True"
+           f=open('snakeAngles.txt','w')            #Open/create a text file "theta.txt" for exporting thetahor tehtaver
+           g=open('snakeVelocities.txt','w')          #Open/create a text file "angvelo.txt" for exporting angvelohor angvelover
+           f.write(" ")
+           g.write(" ")
+           f.close()
+           g.close()
+        elif resetOr == True:
+           angleList = list()
+           f = open("SnakeAngleFeedback.txt","w")
+           for i in range(0,10):
+              f.write("0 0\n")
+           f.close()
+        elif gaits == 'sidewinding':
                 if orientation == '-1':
                    if speed == '3':
                       return snake(time,pi/6,pi/6,3*pi/4,3*pi/4,29*pi/72,29*pi/72,0,0,71*pi/180,False,instruction)
